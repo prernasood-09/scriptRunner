@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Scanner;
 
 import com.base.ObjectBase;
 import com.scriptRunner.FileReader;
@@ -21,15 +22,27 @@ public class FileExecuter extends ObjectBase {
 	final String USER = getObjectPath("USER");
 	final String PASSWORD = getObjectPath("PASSWORD");
 	final String URL = DB_URL + "/" + SCHEMA;
+	private Scanner input;
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
-
+    	
+		
 		FileExecuter fileExecuter = new FileExecuter();
-		fileExecuter.createConnectionAndExecuteFiles();
+		
+		fileExecuter.input = new Scanner(System.in);
+		
+    	System.out.print("Do you want to rollBack immediately if any error is reported in any of the files (yes/No) ?\n");
+    	String rollBack = fileExecuter.input.next().toLowerCase();
+		
+    	if("yes".equals(rollBack)) {
+    		fileExecuter.createConnectionAndExecuteFiles(rollBack);
+    	}else {
+    		fileExecuter.createConnectionAndExecuteFiles("No");
+    	}
 
 	}
 
-	public void createConnectionAndExecuteFiles() throws ClassNotFoundException, IOException {
+	public void createConnectionAndExecuteFiles(String rollBack) throws ClassNotFoundException, IOException {
 
 		Connection connection = null;
 		Statement statement = null;
@@ -55,34 +68,44 @@ public class FileExecuter extends ObjectBase {
 						executableStatement.get(i)[j] = (executableStatement.get(i)[j].replace("$$", "").trim());
 						if(executableStatement.get(i)[j].length()>0) {
 							statement.addBatch(executableStatement.get(i)[j]);
-						//	System.out.println(executableStatement.get(i)[j]);
+					//		System.out.println(executableStatement.get(i)[j]);
 						}
 					}
 				}
-			    statement.executeBatch();
+			  int result[] = statement.executeBatch();
+			  System.out.println( "Batch has managed to process {" + result.length + "} queries successfully..");
 			}
 
 			catch (BatchUpdateException ex) {
-
-				int[] updateCount = ex.getUpdateCounts();
-				
-				int count = 1;
-				for (int i : updateCount) {
+              
+				if("No".equals(rollBack)) {
+					int[] updateCount = ex.getUpdateCounts();
 					
-					if (i == executeFailed) {
-						connection.rollback();
-						System.err.println("Error on request " + count + ": Execution failed \nSQLException: " + ex.getErrorCode() 
-						                      +  " - " + ex.getMessage());
+					int count = 1;
+					int failedEnteries = 0;
+					for (int i : updateCount) {
 						
-					} else {
-						
-							System.out.println("Request " + count + ": OK");
-							statement.close();
+						if (i == executeFailed) {
+							failedEnteries++ ;
+							connection.rollback();
+							System.err.println("Error on request " + count + ": Execution failed \nSQLException: " + ex.getErrorCode() 
+							                      +  " - " + ex.getMessage());	
+							
+						} else {
+							
+							//	System.out.println("Request " + count + ": OK");
+								statement.close();
+						}
+						count++;
 					}
-					count++;
-				}
-				System.out.println( "Batch has managed to process {" + ex.getUpdateCounts().length + "} entries ");
+					System.out.println( "Batch has managed to process {" + ex.getUpdateCounts().length + "} queries, with errors in {" + failedEnteries + "} queries.");
 
+				}
+				else {
+					System.out.println("Something Went Wrong!!");
+					System.exit(0);
+				}
+				
 			} finally {
 				connection.commit();
 				connection.close();
