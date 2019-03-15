@@ -1,6 +1,9 @@
 package com.scriptRunner;
 
 import java.io.BufferedReader;
+
+import org.apache.commons.io.comparator.LastModifiedFileComparator;
+import org.apache.commons.io.filefilter.FileFileFilter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,18 +28,16 @@ public class FileReader extends ObjectBase {
 		if (fileLocation != null) {
 			if (fileLocation.isDirectory()) {
 				files = fileLocation.listFiles();
-				Arrays.sort(files, new Comparator<File>() {
-					public int compare(File f1, File f2) {
-						return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
-					}
-				});
-			} else {
+				if(files.length>0) {
+					Arrays.sort(files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
+					fileReader.getFiles(files, 0);
+				}
+			} else if (fileLocation.isFile()) {
 				files = new File[] { fileLocation };
+				fileReader.getFiles(files, 0);
+			} else {
+				System.out.println("Location Not Found. Please check the path!");
 			}
-			for (File file : files) {
-				System.out.println(file.getName());
-			}
-			fileReader.getFiles(files, 0);
 		}
 	}
 
@@ -46,13 +47,13 @@ public class FileReader extends ObjectBase {
 			for (File file : files) {
 				if (file.isDirectory()) {
 					getFiles(file.listFiles(), level + 1);
-				} else { 
+				} else {
 					filesInDirectory = (file.getAbsolutePath());
 					readFile(filesInDirectory);
 				}
 			}
 		}
-	
+
 	}
 
 	public void readFile(String file) throws ClassNotFoundException, IOException {

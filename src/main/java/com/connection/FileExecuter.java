@@ -72,27 +72,31 @@ public class FileExecuter extends ObjectBase {
 									replacedQueryArray = ("(".concat(queryArray[m].replaceAll(PATTERN1, "")).concat(")").replace(";", ""));
 									if (matchPattern1.find()) {
 										matchedPattern = matchPattern1.group(0);
-										patternMap.put(matchedPattern, replacedQueryArray);
-										for (int n = m + 1; n < queryArray.length; n++) {
-											String query = "";
-											if ((queryArray[n].toLowerCase()).startsWith("insert")
-													&& (queryArray[n].contains(matchedPattern.replace("INTO ", "")))) {
-												for ( Map.Entry<String, String> entry : patternMap.entrySet()) {
-													query = queryArray[n].replaceAll(entry.getKey().replace("INTO", ""), entry.getValue());
-												}	
-												preparedStatement = connection.prepareStatement(query);
-												preparedStatement.addBatch();
+										patternMap.put(matchedPattern, replacedQueryArray);										
+									  }
+									String query = "";
+									if ((queryArray[m].toLowerCase()).startsWith("insert")) {
+										 query = query.concat(queryArray[m]);
+										for(int n = m; n < queryArray.length; n++) {
+											for ( Map.Entry<String, String> entry : patternMap.entrySet()) {
+												if ((queryArray[m]).contains(entry.getKey().replace("INTO", ""))) {
+													query = query.concat(queryArray[m].replaceAll(entry.getKey().replace("INTO", ""), entry.getValue()));
+													System.out.println(query);
+												} 
 											}
+											m++;
 										}
+										
+										preparedStatement = connection.prepareStatement(query);
+										preparedStatement.addBatch();
 									}
-
 								}
 								result = preparedStatement.executeBatch();
 
 							} else {
 								
 								statement.addBatch(executableStatement.get(i)[j]);
-							//	System.out.println(executableStatement.get(i)[j]);
+							  //  System.out.println(executableStatement.get(i)[j]);
 							}
 							result = statement.executeBatch();
 						}
