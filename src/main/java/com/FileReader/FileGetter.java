@@ -21,18 +21,18 @@ public class FileGetter extends ObjectBase  {
 				files = fileLocation.listFiles();
 				if (files.length > 0) {
 					Arrays.sort(files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
-					fileGetter.getFiles(rollBack, files, 0);
+					fileGetter.getFiles(rollBack,files, 0);
 				}
 			} else if (fileLocation.isFile()) {
 				files = new File[] { fileLocation };
-				fileGetter.getFiles(rollBack, files, 0);
+				fileGetter.getFiles(rollBack,files, 0);
 			} else {
 				System.out.println("Location Not Found. Please check the path!");
 			}
 		}
 	}
 
-	public void getFiles(String rollBack, File[] files, int level) throws ClassNotFoundException, IOException {
+	public void getFiles(String rollBack,File[] files, int level) throws ClassNotFoundException, IOException {
 
 		String filesInDirectory;
 		FileReader fileReader = new FileReader();
@@ -40,7 +40,7 @@ public class FileGetter extends ObjectBase  {
 		if (files != null) {
 			for (File file : files) {
 				if (file.isDirectory()) {
-					getFiles(rollBack, file.listFiles(), (level + 1));
+					//getFiles(rollBack, file.listFiles(), (level + 1));
 				} else {
 					filesInDirectory = (file.getAbsolutePath());
 					fileReader.readFile(rollBack, filesInDirectory);

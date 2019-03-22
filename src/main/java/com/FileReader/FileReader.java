@@ -14,7 +14,7 @@ import com.connection.FileExecuter;
 public class FileReader{
 
 	
-	public void readFile(String file, String rollBack) throws ClassNotFoundException, IOException {
+	public void readFile(String rollBack,String file) throws ClassNotFoundException, IOException {
 
 		List<String[]> filesData = new ArrayList<String[]>();
 		String[] finalQuery = null;
@@ -45,7 +45,7 @@ public class FileReader{
 				e.printStackTrace();
 			}
 
-			fileExecuter.executeFiles(rollBack, filesData, fileName);
+			fileExecuter.executeFiles(rollBack,filesData, fileName);
 
 		}
 

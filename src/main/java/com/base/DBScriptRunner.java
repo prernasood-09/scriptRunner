@@ -15,9 +15,12 @@ public class DBScriptRunner extends ObjectBase {
 		DBScriptRunner dbScriptRunner = new DBScriptRunner();
 		dbScriptRunner.input = new Scanner(System.in);
 		
-		System.out.println("Do you want to exit from application on any error in any file ? (yes/no)");
+		System.out.println("Do you want to exit from application on any error in any file ? (yes/no)\n\n");
         String rollBack = dbScriptRunner.input.next().toLowerCase();
-		
+        
+        //fileGetter.getFilesFromDirectory();
+        
+	
     	if(dbScriptRunner.getObjectPath("RESPONSE").equals(rollBack)) {
     		fileGetter.getFilesFromDirectory(rollBack);
     	}else {
