@@ -22,9 +22,16 @@ public class DBScriptRunner extends ObjectBase {
         
 	
     	if(dbScriptRunner.getObjectPath("RESPONSE").equals(rollBack)) {
+    		
     		fileGetter.getFilesFromDirectory(rollBack);
+    		
+    		System.err.println("completed!!!");
+    		
     	}else {
+    		
     		fileGetter.getFilesFromDirectory("No");
+    		
+    		System.err.println("completed!!!");
     	}
 
 	}

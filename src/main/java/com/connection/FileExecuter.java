@@ -20,7 +20,7 @@ public class FileExecuter extends ObjectBase {
 			throws ClassNotFoundException, IOException {
 
 		ConnectionCreater connectionCreater = new ConnectionCreater();
-
+		
 		PreparedStatement preparedStatement = null;
 		Statement statement = null;
 
@@ -28,6 +28,7 @@ public class FileExecuter extends ObjectBase {
 
 			int executionFailed = Statement.EXECUTE_FAILED;
 			Connection connection = connectionCreater.createConnection();
+			connection.setAutoCommit(false);
 			statement = connection.createStatement();
 			int result[] = null;
 			try {
@@ -40,7 +41,7 @@ public class FileExecuter extends ObjectBase {
 							if ((executableStatementsList.get(i)[j].toLowerCase()).startsWith(getObjectPath("STARTS_WITH_SELECT")) || (executableStatementsList.get(i)[j].toLowerCase()).startsWith(getObjectPath("STARTS_WITH_INSERT"))) {
 
 								String matchedPattern = "";
-								String queryArray[] = executableStatementsList.get(i)[j].split("\n");
+								String queryArray[] = executableStatementsList.get(i)[j].split(";");
 								Map<String, String> patternMap = new HashMap<String, String>();
 
 								for (int m = 0; m < queryArray.length; m++) {
@@ -55,40 +56,41 @@ public class FileExecuter extends ObjectBase {
 										patternMap.put(matchedPattern, replacedQuery);
 									}
 									String query = "";
-									if ((queryArray[m].toLowerCase()).startsWith(getObjectPath("STARTS_WITH_INSERT")) && ((queryArray[m].toLowerCase()).contains(getObjectPath("CONTAINS_@")))) {
+									if ((queryArray[m].toLowerCase().trim()).startsWith(getObjectPath("STARTS_WITH_INSERT")) && ((queryArray[m].toLowerCase()).contains(getObjectPath("CONTAINS_@")))) {
 										query = query.concat(queryArray[m]);
 										for (int n = m; n < queryArray.length; n++) {
 											for (Map.Entry<String, String> entry : patternMap.entrySet()) {
 												if ((queryArray[m]).contains(entry.getKey()
 														.replace(getObjectPath("REPLACE_WITH_INTO"), ""))) {
-													query = query.concat(queryArray[m].replaceAll(entry.getKey()
+													query = (queryArray[m].replaceAll(entry.getKey()
 															 .replace(getObjectPath("REPLACE_WITH_INTO"), ""),entry.getValue()));
-													 System.out.println(query);
+													queryArray[m] = query ;
+													
 												}else {
 													System.out.println(query);
 												}
+												System.out.println(query);
+												 preparedStatement = connection.prepareStatement(query);
+												 preparedStatement.addBatch();
+												 result = preparedStatement.executeBatch();
 												
 											}
 											m++;
 										}
-
-										preparedStatement = connection.prepareStatement(query);
-										preparedStatement.addBatch();
-									} else if (!((queryArray[m].toLowerCase()).contains(getObjectPath("CONTAINS_@"))) && ((queryArray[m].toLowerCase()).startsWith(getObjectPath("STARTS_WITH_INSERT")))) {
-										query = query.concat(queryArray[m]);
 										
-										preparedStatement = connection.prepareStatement(query);
-										preparedStatement.addBatch();
+									} else if (!((queryArray[m].toLowerCase()).contains(getObjectPath("CONTAINS_@"))) && ((queryArray[m].toLowerCase().trim()).startsWith(getObjectPath("STARTS_WITH_INSERT")))) {
+										query = query.concat(queryArray[m]);
+										System.out.println(query);
+										connection.setAutoCommit(true);
+										statement.addBatch(query);
+										result = statement.executeBatch();
 									}
 								}
-								result = preparedStatement.executeBatch();
 
-							} else if((executableStatementsList.get(i)[j].toLowerCase())
-									.startsWith(getObjectPath("STARTS_WITH_DROP")) || (executableStatementsList.get(i)[j].toLowerCase())
-									.startsWith(getObjectPath("STARTS_WITH_CREATE")) ) {
+							} else {
 
 								statement.addBatch(executableStatementsList.get(i)[j]);
-								// System.out.println(executableStatement.get(i)[j]);
+							 // System.out.println(executableStatement.get(i)[j]);
 								result = statement.executeBatch();
 							}							
 						}
@@ -100,7 +102,7 @@ public class FileExecuter extends ObjectBase {
 			}
 
 			catch (BatchUpdateException ex) {
-
+				connection.setAutoCommit(false);
 				int[] updateCount = ex.getUpdateCounts();
 
 				int count = 1;
@@ -119,7 +121,7 @@ public class FileExecuter extends ObjectBase {
 
 					} else {
 						connection.commit();
-						// System.out.println("Request " + count + ": OK");
+					 // System.out.println("Request " + count + ": OK");
 						statement.close();
 					}
 					count++;
