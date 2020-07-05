@@ -36,7 +36,7 @@ public class FileReader{
 				}
 				buffer.close();
 
-				finalQuery = stringBuffer.toString().split("DELIMITER|$$");
+				finalQuery = stringBuffer.toString().replace("DELIMITER ;","DELIMITER").split("DELIMITER|$$");
 				if (finalQuery != null) {
 					filesData.add(finalQuery);
 				}

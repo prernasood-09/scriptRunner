@@ -11,27 +11,26 @@ public class DBScriptRunner extends ObjectBase {
 	
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
 		
-		FileGetter fileGetter = new FileGetter();
 		DBScriptRunner dbScriptRunner = new DBScriptRunner();
+		FileGetter fileGetter = new FileGetter();
+	
 		dbScriptRunner.input = new Scanner(System.in);
 		
 		System.out.println("Do you want to exit from application on any error in any file ? (yes/no)\n\n");
         String rollBack = dbScriptRunner.input.next().toLowerCase();
-        
-        //fileGetter.getFilesFromDirectory();
         
 	
     	if(dbScriptRunner.getObjectPath("RESPONSE").equals(rollBack)) {
     		
     		fileGetter.getFilesFromDirectory(rollBack);
     		
-    		System.err.println("completed!!!");
+    		System.err.println("\n completed!!!");
     		
     	}else {
     		
     		fileGetter.getFilesFromDirectory("No");
     		
-    		System.err.println("completed!!!");
+    		System.err.println("\n completed!!!");
     	}
 
 	}

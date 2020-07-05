@@ -21,15 +21,16 @@ public class FileExecuter extends ObjectBase {
 
 		ConnectionCreater connectionCreater = new ConnectionCreater();
 		
-		PreparedStatement preparedStatement = null;
+	//	PreparedStatement preparedStatement = null;
 		Statement statement = null;
 
 		try {
 
 			int executionFailed = Statement.EXECUTE_FAILED;
 			Connection connection = connectionCreater.createConnection();
-			connection.setAutoCommit(false);
+
 			statement = connection.createStatement();
+			
 			int result[] = null;
 			try {
 				for (int i = 0; i < executableStatementsList.size(); i++) {
@@ -69,10 +70,11 @@ public class FileExecuter extends ObjectBase {
 												}else {
 													System.out.println(query);
 												}
-												System.out.println(query);
-												 preparedStatement = connection.prepareStatement(query);
-												 preparedStatement.addBatch();
-												 result = preparedStatement.executeBatch();
+												 System.out.println(query);
+												// preparedStatement = connection.prepareStatement(query);
+												// preparedStatement.addBatch();
+												// result = preparedStatement.executeBatch();
+												 statement.addBatch(query);
 												
 											}
 											m++;
@@ -83,20 +85,22 @@ public class FileExecuter extends ObjectBase {
 										System.out.println(query);
 										connection.setAutoCommit(true);
 										statement.addBatch(query);
-										result = statement.executeBatch();
+										
 									}
 								}
+								
+								result = statement.executeBatch();
 
 							} else {
 
 								statement.addBatch(executableStatementsList.get(i)[j]);
-							 // System.out.println(executableStatement.get(i)[j]);
+			// 				     System.out.println(executableStatementsList.get(i)[j]);
 								result = statement.executeBatch();
 							}							
 						}
 					}
 				}
-
+				result = statement.executeBatch();
 				System.out.println("Batch has managed to process {" + result.length + "} queries from file " + fileName
 						+ " successfully..");
 			}

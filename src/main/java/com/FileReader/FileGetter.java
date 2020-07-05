@@ -40,7 +40,7 @@ public class FileGetter extends ObjectBase  {
 		if (files != null) {
 			for (File file : files) {
 				if (file.isDirectory()) {
-					//getFiles(rollBack, file.listFiles(), (level + 1));
+				//	getFiles(rollBack, file.listFiles(), (level + 1));
 				} else {
 					filesInDirectory = (file.getAbsolutePath());
 					fileReader.readFile(rollBack, filesInDirectory);

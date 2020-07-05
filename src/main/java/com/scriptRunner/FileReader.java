@@ -85,7 +85,7 @@ public class FileReader extends ObjectBase {
 				e.printStackTrace();
 			}
 
-			fileExecuter.createConnectionAndExecuteFiles(filesData, fileName);
+			fileExecuter.executeFiles(fileName, filesData, fileName);
 
 		}
 
